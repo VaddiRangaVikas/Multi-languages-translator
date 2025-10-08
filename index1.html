@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Languages Translator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .api-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .api-section label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .api-section input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .api-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .api-note {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .translation-section {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .translate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .translate-btn:active {
+            transform: translateY(0);
+        }
+
+        .translate-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .output-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 120px;
+            border: 2px solid #e9ecef;
+        }
+
+        .output-section h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+
+        .output-text {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🇮🇳 Indian Languages Translator</h1>
+        <p class="subtitle">Translate text to various Indian languages</p>
+
+        <div class="api-section">
+            <label for="apiKey">API Key</label>
+            <input type="password" id="apiKey" placeholder="Enter your translation API key">
+            <div class="api-note">Your API key is stored locally and never sent anywhere except the translation service</div>
+        </div>
+
+        <div class="error" id="errorMsg"></div>
+
+        <div class="translation-section">
+            <div class="input-group">
+                <label for="sourceText">Enter Text to Translate</label>
+                <textarea id="sourceText" placeholder="Type or paste your text here..."></textarea>
+                <div class="char-count"><span id="charCount">0</span> characters</div>
+            </div>
+
+            <div class="input-group">
+                <label for="targetLang">Select Target Language</label>
+                <select id="targetLang">
+                    <option value="">-- Choose an Indian Language --</option>
+                    <option value="hi">Hindi (हिन्दी)</option>
+                    <option value="bn">Bengali (বাংলা)</option>
+                    <option value="te">Telugu (తెలుగు)</option>
+                    <option value="mr">Marathi (मराठी)</option>
+                    <option value="ta">Tamil (தமிழ்)</option>
+                    <option value="gu">Gujarati (ગુજરાતી)</option>
+                    <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                    <option value="ml">Malayalam (മലയാളം)</option>
+                    <option value="pa">Punjabi (ਪੰਜਾਬੀ)</option>
+                    <option value="or">Odia (ଓଡ଼ିଆ)</option>
+                    <option value="as">Assamese (অসমীয়া)</option>
+                    <option value="ur">Urdu (اردو)</option>
+                    <option value="sa">Sanskrit (संस्कृत)</option>
+                    <option value="ks">Kashmiri (कॉशुर)</option>
+                    <option value="ne">Nepali (नेपाली)</option>
+                    <option value="sd">Sindhi (سنڌي)</option>
+                    <option value="mai">Maithili (मैथिली)</option>
+                    <option value="sat">Santali (ᱥᱟᱱᱛᱟᱲᱤ)</option>
+                </select>
+            </div>
+
+            <button class="translate-btn" id="translateBtn">Translate</button>
+
+            <div class="loading" id="loading">
+                <span class="spinner"></span>
+                Translating...
+            </div>
+
+            <div class="output-section">
+                <h3>Translation:</h3>
+                <div class="output-text" id="translatedText">Your translation will appear here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKeyInput = document.getElementById('apiKey');
+        const sourceText = document.getElementById('sourceText');
+        const targetLang = document.getElementById('targetLang');
+        const translateBtn = document.getElementById('translateBtn');
+        const translatedText = document.getElementById('translatedText');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const charCount = document.getElementById('charCount');
+
+        // Store API key in memory (not localStorage per requirements)
+        let apiKey = '';
+
+        apiKeyInput.addEventListener('input', (e) => {
+            apiKey = e.target.value.trim();
+        });
+
+        sourceText.addEventListener('input', (e) => {
+            charCount.textContent = e.target.value.length;
+        });
+
+        translateBtn.addEventListener('click', async () => {
+            const text = sourceText.value.trim();
+            const lang = targetLang.value;
+
+            errorMsg.style.display = 'none';
+            errorMsg.textContent = '';
+
+            if (!apiKey) {
+                showError('Please enter your API key');
+                return;
+            }
+
+            if (!text) {
+                showError('Please enter text to translate');
+                return;
+            }
+
+            if (!lang) {
+                showError('Please select a target language');
+                return;
+            }
+
+            await translateText(text, lang);
+        });
+
+        async function translateText(text, targetLangCode) {
+            translateBtn.disabled = true;
+            loading.style.display = 'block';
+            translatedText.textContent = 'Translating...';
+
+            try {
+                // Google Cloud Translation API endpoint
+                const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        q: text,
+                        target: targetLangCode,
+                        format: 'text'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || 'Translation failed');
+                }
+
+                const data = await response.json();
+                const translation = data.data.translations[0].translatedText;
+                
+                translatedText.textContent = translation;
+
+            } catch (error) {
+                showError(`Translation error: ${error.message}`);
+                translatedText.textContent = 'Translation failed. Please check your API key and try again.';
+            } finally {
+                translateBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+
+        function showError(message) {
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            setTimeout(() => {
+                errorMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        // Allow Enter key in textarea
+        sourceText.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                translateBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
